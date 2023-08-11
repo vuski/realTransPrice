@@ -65,6 +65,22 @@ let axisData = new Array();
 let axisTextData = new Array();
 let maxTextData = new Array();
 
+window.onload = function() {
+  const mobileWarning = document.getElementById("mobileWarning");
+
+  // 모바일 기기인지 판별
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  if (isMobile) {
+      mobileWarning.style.display = "block";
+  }
+
+  // 메시지를 클릭하면 메시지를 숨김
+  mobileWarning.addEventListener("click", function() {
+      mobileWarning.style.display = "none";
+  });
+}
+
+
 const deckgl = new Deck({
 
   onWebGLInitialized: (gl) => {
@@ -787,3 +803,4 @@ sliderInstancePart.update({
     }
   }    
 });
+

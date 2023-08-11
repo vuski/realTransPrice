@@ -97,3 +97,27 @@ h2 {
     /* z-index : 40; */
     padding : 10px 0px 10px 0px;
 }
+
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+.warning-message {
+    display: none;
+    position: fixed;
+    top: 30%;
+    left: 10%;
+    right: 10%;
+    padding: 50px;
+    background-color: #d63054;
+    color: #ffffff;
+    text-align: center;
+    border-radius: 25px;
+    cursor: pointer;
+    z-index: 1000;
+    font-family: 'Pretendard-Regular';
+    font-size : min(4vw, 1.4em);   
+    animation: blink 1s infinite;  
+}
