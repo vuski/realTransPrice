@@ -10,8 +10,28 @@ import {load} from '@loaders.gl/core';
 import ionRangeSlider from 'ion-rangeslider';
 
 
+{
+  const originalDate = new Date("2006-01-01");
+  const x = 366; // 예를 들어 365일을 더하고자 할 때
+  
+  originalDate.setDate(originalDate.getDate() + x);
+  
+  console.log(originalDate);
+
+  const year = originalDate.getFullYear();
+  const month = originalDate.getMonth();
+  console.log(year, month);
+  const yearMonthNum = (year-2006) * 12 + month;
+
+}
+
 
 let currentZoom = 7;
+
+let rankMin = 0.0;
+let rankMax = 0.1;
+let groupMax = 0;
+let groupAvgPath = new Array();
 
 const deckgl = new Deck({
   parent: document.getElementById('container'),
@@ -57,6 +77,8 @@ function loadBinaryDataFromFile(fileName) {
 }
 
 let dataTrans = new Array();
+let dataGroup = new Map();
+
 const fileDate = "./data/3040date.bin";
 const filePrice = "./data/3040price.bin";
 
@@ -73,13 +95,56 @@ Promise.all([loadBinaryDataFromFile(fileDate), loadBinaryDataFromFile(filePrice)
         const date = dataDate[i] * 256 + dataDate[i+1];
         const price = (dataPrice[i] * 256 + dataPrice[i+1]) * 100;
 
-        dataTrans[i/2] = {
+        const monthGroup = getYearMonthNum(date);
+        // dataTrans[i/2] = {
+        //   date : date,
+        //   price : price,
+          
+        // }
+
+        if (!dataGroup.has(monthGroup)) {
+          dataGroup.set(monthGroup, new Array());
+        }
+        dataGroup.get(monthGroup).push({
           date : date,
-          price : price
+          price : price,
+          monthGroup : monthGroup,
+          pos : [date*xMul,price*yMul],
+          rank : 0
+        });
+
+      }
+      
+      let idx = 0;
+      for (let [group, valueArr] of dataGroup) {
+
+        //그룹 최대값 구하기
+        if (groupMax<group) groupMax = group;
+
+        // 1. 한 그룹 안에서 price 값을 기준으로 내림차순 정렬한다.
+        valueArr.sort((a, b) => b.price - a.price);
+        
+        // 2. rank를 부여한다.
+        for (let i = 0; i < valueArr.length; i++) {
+            valueArr[i].rank = i + 1;
+        }
+
+        // 3. rankR 값을 부여한다.
+        let maxRank = valueArr.length;
+        for (let i = 0; i < valueArr.length; i++) {
+            // 1위는 1.0, 마지막 순위는 0.0 이므로
+            valueArr[i].rankR = (maxRank - valueArr[i].rank) / (maxRank - 1);
+            dataTrans[idx] = valueArr[i];
+            idx++;
         }
       }
+
+  
+      console.log(dataTrans);
+      console.log(dataGroup);
       const et = new Date();
-      console.log(dataTrans, et-st);
+      console.log("runtime :", et-st, "ms");
+      makeAvgPath();      
       mainloop();
   })
   .catch(error => {
@@ -87,13 +152,12 @@ Promise.all([loadBinaryDataFromFile(fileDate), loadBinaryDataFromFile(filePrice)
   });
 
 
-
-const originalDate = new Date("2006-01-01").getDate();
+const date20060101 = new Date("2006-01-01");
 function addDaysToDate(daysToAdd) {
   // dateString 형식: 'YYYY-MM-DD'
   
-  const newDate = new Date();
-  newDate.setDate(originalDate + daysToAdd);
+  const newDate = new Date("2006-01-01");
+  newDate.setDate(newDate.getDate() + daysToAdd);
 
   const year = newDate.getFullYear();
   const month = String(newDate.getMonth() + 1).padStart(2, '0');  // 0부터 시작하는 월 값을 가져와서 1을 더함
@@ -102,7 +166,27 @@ function addDaysToDate(daysToAdd) {
   return `${year}-${month}-${day}`;
 }
 
-console.log("addDaysToDate(5)", addDaysToDate(5));
+function getYearMonthNum(dateNum) {
+  // dateString 형식: 'YYYY-MM-DD'
+  
+  const newDate = new Date("2006-01-01");
+  newDate.setDate(newDate.getDate() + dateNum);
+
+  const year = newDate.getFullYear();
+  const month = newDate.getMonth();
+  //console.log(year, month);
+  const yearMonthNum = (year-2006) * 12 + month;
+  return yearMonthNum
+}
+
+
+function monthGroupToDate(monthGroup) {
+  const year = (monthGroup/12) + 2006;
+  const month = monthGroup%12;
+  let date = new Date(year, month, 15);
+  return Math.floor((date-date20060101) / (1000 * 60 * 60 * 24));
+}
+//console.log("addDaysToDate(5)", addDaysToDate(5));
 
 
 
@@ -127,8 +211,8 @@ function mainloop() {
 
       radiusMinPixels: 0,
       radiusScale: 1,
-      getPosition: d => [d.date*xMul,d.price*yMul],
-      getRadius: 3,
+      getPosition: d => d.pos,
+      getRadius: 2,
       radiusUnits: 'pixels',
       getFillColor:  d => [0,0,0, 40],
       // Interactive props
@@ -143,39 +227,10 @@ function mainloop() {
       },
       
       //visible : visible02,
-      // getFilterValue: d => [d.year],
-      // filterRange: [[year-9, year]],
-      // extensions: [new DataFilterExtension({filterSize: 1})]    
+      getFilterValue: d => [d.rankR],
+      filterRange: [[rankMin, rankMax]],
+      extensions: [new DataFilterExtension({filterSize: 1})]    
     }),
-
-    // new ScatterplotLayer({
-    //   id: 'seoulTemp2',
-    //   data: tempData,
-      
-    //   // Styles
-    //   filled: true,
-    //   getFilterValue: d => [d.year],
-    //   filterRange: [[year, year]],
-    //   radiusMinPixels: 0,
-    //   radiusScale: 1,
-    //   getPosition: d => [d.day*xMul,d.avgTmp*yMul],
-    //   getRadius: 5,
-    //   radiusUnits: 'pixels',
-    //   getFillColor:  [0,0,0,255],
-    //   // Interactive props
-    //   pickable: true,
-    //   autoHighlight: true,
-    //   // onHover: ({object}) => object && console.log(`일 최고기온 : ${object.maxTemp}`),
-
-    //   updateTriggers: {
-    //     // This tells deck.gl to recalculate radius when `currentYear` changes
-    //     getRadius : []
-       
-    //   },
-      
-    //   //visible : visible02,
-    //   extensions: [new DataFilterExtension({filterSize: 1})]    
-    // }),
 
     // new TextLayer({
     //   id: 'text',
@@ -202,17 +257,17 @@ function mainloop() {
        
     //   // },
     // }),
-    // new PathLayer({
-    //   id: 'line-layer',
-    //   data : avgPath,
-    //   //pickable: true,
-    //   getWidth: 2,
-    //   widthScale: 1,
-    //   widthMinPixels: 2,
-    //   getPath: d => d.path,
-    //   getColor: [0,0,0,255],
+    new PathLayer({
+      id: 'line-layer',
+      data : groupAvgPath,
+      //pickable: true,
+      getWidth: 4,
+      widthScale: 1,
+      widthMinPixels: 2,
+      getPath: d => d.path,
+      getColor: [255,0,0,255],
 
-    // }),
+    }),
 
     // new PathLayer({
     //   id: 'line-layer2',
@@ -263,23 +318,76 @@ function mainloop() {
   deckgl.setProps({layers});
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+
 window.addEventListener("keydown", (e) => {
   if (e.key=='+') {
-    
+    rankMin += 0.1;
+    rankMax += 0.1;
+    if (rankMax>=1.0) {
+      rankMin = 0.9;
+      rankMax = 1.0;
+    }
   }
   if (e.key=='-') {
-    
+    rankMin -= 0.1;
+    rankMax -= 0.1;
+    if (rankMin<=0.0) {
+      rankMin = 0.0;
+      rankMax = 0.1;
+    }
   }
-  update();
+  makeAvgPath();      
+  mainloop();
 });
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+
+function makeAvgPath() {
+
+  const avgPath = new Array(groupMax+1);
+  for (let [group, valueArr] of dataGroup) {
+
+    let sum = 0;
+    let cnt = 0;
+    // 2. rank를 부여한다.
+    for (let i = 0; i < valueArr.length; i++) {
+      if (valueArr[i].rankR>rankMax) continue;
+      if (valueArr[i].rankR<rankMin) break;
+      sum += valueArr[i].price;
+      cnt++;
+    }
+    const avg = sum / cnt;
+    avgPath[group] = {
+      monthGroup : group,
+      date : monthGroupToDate(group),
+      avgPrice : avg,      
+    }
+  }
+  console.log("avgPath", avgPath);
+  const pathArr = new Array();
+  for (const d of avgPath) {
+    pathArr.push([d.date * xMul, d.avgPrice * yMul]);
+  }
+  groupAvgPath = new Array();
+  groupAvgPath.push({
+    path : pathArr
+  });
+}
 
 
 
-$(document).ready(function(){
- 
 
-});    
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
 
 const doc = document.getElementById("staticItems");
 const cl0 = 'h1';
@@ -295,3 +403,9 @@ function drawTitle(text, tagLevel) {
   div.className = 'title'+tagLevel;
   doc.appendChild(div);
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
