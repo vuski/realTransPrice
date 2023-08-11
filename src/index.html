@@ -2,23 +2,47 @@
 <html lang="ko">
   <head>
     <meta charset="utf-8">
-    <meta property="og:title"              content="아파트 매매 실거래가" />
+    <meta property="og:title"              content="전국 아파트 매매 실거래가" />
     <meta property="og:description"        content="" />
-    <meta property="og:image"              content="" />
+    <meta property="og:image"              content="https://raw.githubusercontent.com/vuski/main/realTransPrice/titleImage.jpg" />
     
     <title>아파트 매매 실거래가</title>
 
 
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZMYNSYW2L5"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZMYNSYW2L5');
+</script>
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
   <script src="./d3.v7.min.js"></script>
   <script src="./jquery.min.js"></script>
+  <link href="./ion.rangeSlider.min.css" rel="stylesheet" />
   <link href="./basic.css" rel="stylesheet">   
+  <link href="./loading.css" rel="stylesheet" >
 
 </head>
 
   <body>
+    <div id="loadingAlert">
+    </div>
+
     <div id="staticItems"></div>
-    <div id="container"></div>    
+    <div id="container">
+      
+    </div>   
+    <div id = "sectionOption">
+      <div class="range-slider-area">
+        <input type="text" id="areaSlider" name="areaSelector" value="" />        
+      </div>
+      <div class="range-slider-part">
+        <input type="text" id="partSlider" name="partSelector" value="" />        
+      </div>
+    </div> 
   </body>
 
 

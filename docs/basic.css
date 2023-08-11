@@ -15,10 +15,12 @@
 
 #container {
     position: absolute;
+    overflow: hidden;
     top: 0;
     bottom: 0;
     width: 100%;
-    z-index : 210;
+    /* background-color: rgb(247, 201, 201); */
+    z-index : 5;
 }
 
 #staticItems {
@@ -33,6 +35,8 @@
     transform: translateX(-50%);
     /* background : #aaaa1144; */
     z-index : 10;
+    pointer-events: none;
+    font-family:  'Pretendard-Regular';
 }            
 
 h1 {
@@ -41,8 +45,55 @@ h1 {
     width: 96%;    
     /* background : #99999944;     */
     text-align : center;
-    font-family: 'Shilla_CultureB-Bold';
-    font-size : min(5vw, 3em);       
-    /* padding : 0px 5px 0px 5px; */
+    font-family: 'Pretendard-Regular';
+    font-size : min(5vw, 2em);       
+    padding : 10px 5px 0px 5px;
 }
 
+h2 {
+    overflow : visible;
+    position: relative;
+    width: 96%;    
+    /* background : #99999944;     */
+    text-align : center;
+    font-family: 'Pretendard-Regular';
+    font-size : min(4vw, 1.4em);       
+    padding : 5px 5px 0px 5px;
+}
+
+.deck-tooltip {
+    overflow : hidden !important;
+}
+
+
+#sectionOption {
+    position: absolute;
+    width : 100%;
+    height : 80px;
+    bottom : 0px;
+    overflow: hidden;
+    /* background-color: rgba(0,0,0,0.8); */
+    z-index : 30;
+  }
+
+  
+
+.range-slider-area {
+    position: absolute;
+    width : 30%;
+    /* top : 450px; */
+    left : 5%;
+    align-content: center;
+    /* z-index : 40; */
+    padding : 10px 0px 10px 0px;
+}
+
+.range-slider-part {
+    position: absolute;
+    width : 55%;
+    /* top : 450px; */
+    left : 40%;
+    align-content: center;
+    /* z-index : 40; */
+    padding : 10px 0px 10px 0px;
+}
