@@ -1,0 +1,48 @@
+@font-face {
+    font-family: 'Pretendard-Regular';
+    src: url('./font/Pretendard-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+  }*
+  
+  
+  {
+    font-family: 'Pretendard-Regular';
+    margin: 0;
+    padding: 0;
+  }
+/**********************************************************************************************************/  
+
+#container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    z-index : 210;
+}
+
+#staticItems {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width : 100%;
+    max-width: 1500px;
+    height : 100%;
+    z-index : 20;
+    left : 50%;
+    transform: translateX(-50%);
+    /* background : #aaaa1144; */
+    z-index : 10;
+}            
+
+h1 {
+    overflow : visible;
+    position: relative;
+    width: 96%;    
+    /* background : #99999944;     */
+    text-align : center;
+    font-family: 'Shilla_CultureB-Bold';
+    font-size : min(5vw, 3em);       
+    /* padding : 0px 5px 0px 5px; */
+}
+
