@@ -707,7 +707,7 @@ function refreshTitle() {
   }
 
   let tx;
-  tx =  `전국 아파트 매매 실거래가(2006.01~2013.07)`;
+  tx =  `전국 아파트 매매 실거래가(2006.01~2023.07)`;
   drawTitle(tx, 1);
 
   tx = areaTextArr[areaSetIdx] + " &nbsp;&nbsp;실거래가&nbsp;" + parseInt(rankMin*100)+"%~"+parseInt(rankMax*100)+"%&nbsp;구간(월 단위)";
